@@ -60,6 +60,10 @@ io.on('connection', function (socket) {
 //    ENDPOINTS & LOGIC    //
 // ----------------------- //
 
+app.get("/", (req, res) => {
+    res.send("Homepage")
+})
+
 app.get('/logs', (req, res) => {
     res.send(JSON.stringify(latestLogs))
 });
