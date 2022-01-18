@@ -2,9 +2,19 @@ const express = require('express');
 const app = express();
 const http = require('http');
 const mqtt = require('mqtt');
+const cors = require('cors');
 const server = http.createServer(app);
-const port = 3000
-
+let bodyParser = require('body-parser');
+const {addLog} = require("./eventhandler");
+app.use(bodyParser.json());
+app.use(cors)
+const port = 3000;
+let {Server} = require('socket.io');
+const io = new Server(server, {
+    cors: {
+        origin: "*"
+    }
+});
 
 
 // ----------------------- //
@@ -19,20 +29,51 @@ let client = mqtt.connect({
 });
 
 client.on('connect', function (){
-    console.log('Connected to mqtt')
-})
+    console.log('Connected to mqtt');
+    client.subscribe(["/log", "/gate/toggle"], () => {
+        console.log(`Subscribe to topic '/log'`)
+    })
+});
 
 client.on('message', function (topic, message) {
-    console.log('Received message: ', topic, message.toString())
-})
+    if (topic === "/log"){
+        io.emit("log", `${new Date().toISOString().substring(0,19)} - ${JSON.parse(message.toString()).log}`)
+    }    if (topic === "/gate/toggle"){
+        console.log("gate got toggled")
+    }
+});
+
 
 // ----------------------- //
-//        ENDPOINTS        //
+//      SOCKET CONTROL     //
 // ----------------------- //
-app.get('/gate', (req, res) => {
-    client.publish('gate/state', 'GateState changed')
-})
+
+io.on('connection', function (socket) {
+    console.log("new connection established")
+    socket.on('togglegate', (msg) => {
+        console.log("here")
+        client.publish("/gate/toggle", msg);
+    });
+});
+
+// ----------------------- //
+//    ENDPOINTS & LOGIC    //
+// ----------------------- //
+
+app.get('/logs', (req, res) => {
+    res.send(JSON.stringify(latestLogs))
+});
+
+app.post('/logs', (req, res) => {
+    addLog(req.body.description)
+    res.status(200).end();
+});
+
+app.patch('/gate/:id', (req, res) => {
+    client.publish('gate/state/' + req.params.id, 'toggle');
+    res.status(200).end();
+});
 
 server.listen(port, () => {
-    console.log(`Example app listening at http://localhost:${port}`)
-})
+    console.log(`Example app listening at http://localhost:${port}`);
+});
