@@ -8,7 +8,7 @@ let bodyParser = require('body-parser');
 const {addLog} = require("./eventhandler");
 app.use(bodyParser.json());
 app.use(cors)
-const port = 3000;
+const port = process.env.PORT || 3000;
 let {Server} = require('socket.io');
 const io = new Server(server, {
     cors: {
