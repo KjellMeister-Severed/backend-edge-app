@@ -5,7 +5,6 @@ const mqtt = require('mqtt');
 const cors = require('cors');
 const server = http.createServer(app);
 let bodyParser = require('body-parser');
-const {addLog} = require("./eventhandler");
 app.use(bodyParser.json());
 app.use(cors)
 const port = process.env.PORT || 3000;
@@ -16,7 +15,6 @@ const io = new Server(server, {
     }
 });
 
-//
 // ----------------------- //
 //      MQTT CONTROLS      //
 // ----------------------- //
@@ -45,34 +43,11 @@ client.on('message', function (topic, message) {
 // ----------------------- //
 //      SOCKET CONTROL     //
 // ----------------------- //
-
 io.on('connection', function (socket) {
     console.log("new connection established")
     socket.on('togglegate', (msg) => {
         client.publish("/gate/toggle", msg);
     });
-});
-
-// ----------------------- //
-//    ENDPOINTS & LOGIC    //
-// ----------------------- //
-
-app.get("/", (req, res) => {
-    res.send("Homepage")
-})
-
-app.get('/logs', (req, res) => {
-    res.send(JSON.stringify(latestLogs))
-});
-
-app.post('/logs', (req, res) => {
-    addLog(req.body.description)
-    res.status(200).end();
-});
-
-app.patch('/gate/:id', (req, res) => {
-    client.publish('gate/state/' + req.params.id, 'toggle');
-    res.status(200).end();
 });
 
 server.listen(port, () => {
