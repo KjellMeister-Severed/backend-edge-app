@@ -30,16 +30,14 @@ let client = mqtt.connect({
 
 client.on('connect', function (){
     console.log('Connected to mqtt');
-    client.subscribe(["/log", "/gate/toggle"], () => {
-        console.log(`Subscribe to topic '/log'`)
+    client.subscribe(["/gate/toggle"], () => {
+        console.log(`Subscribed to topic '/log'`)
     })
 });
 
 client.on('message', function (topic, message) {
-    if (topic === "/log"){
-        io.emit("log", `${new Date().toISOString().substring(0,19)} - ${JSON.parse(message.toString()).log}`)
-    }    if (topic === "/gate/toggle"){
-        console.log("gate got toggled")
+    if (topic === "/gate/toggle"){
+        io.emit("log", `${new Date().toISOString().substring(0,19)} - "Gate got Toggled"}`)
     }
 });
 
@@ -51,7 +49,7 @@ client.on('message', function (topic, message) {
 io.on('connection', function (socket) {
     console.log("new connection established")
     socket.on('togglegate', (msg) => {
-        console.log("here")
+        io.emit("log", `${new Date().toISOString().substring(0,19)} - "Gate got Toggled"}`)
         client.publish("/gate/toggle", msg);
     });
 });
@@ -79,5 +77,5 @@ app.patch('/gate/:id', (req, res) => {
 });
 
 server.listen(port, () => {
-    console.log(`Example app listening at http://localhost:${port}`);
+    console.log(`Example app listening at ${port}`);
 });
