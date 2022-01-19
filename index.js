@@ -33,7 +33,7 @@ client.on('connect', function (){
     })
 });
 
-client.on('message', function (topic, message) {
+client.on('message', function (topic) {
     if (topic === "/gate/toggle"){
         io.emit("log", `${new Date().toISOString().substring(0,19)} - "Gate got Toggled"`)
     }
