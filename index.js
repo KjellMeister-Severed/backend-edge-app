@@ -37,7 +37,7 @@ client.on('connect', function (){
 
 client.on('message', function (topic, message) {
     if (topic === "/gate/toggle"){
-        io.emit("log", `${new Date().toISOString().substring(0,19)} - "Gate got Toggled"}`)
+        io.emit("log", `${new Date().toISOString().substring(0,19)} - "Gate got Toggled"`)
     }
 });
 
@@ -49,7 +49,6 @@ client.on('message', function (topic, message) {
 io.on('connection', function (socket) {
     console.log("new connection established")
     socket.on('togglegate', (msg) => {
-        io.emit("log", `${new Date().toISOString().substring(0,19)} - "Gate got Toggled"}`)
         client.publish("/gate/toggle", msg);
     });
 });
